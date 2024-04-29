@@ -1,11 +1,12 @@
 import path from "path";
 import { readFile } from "fs";
-import photos from "./model.js"
+import users from "./model.js"
 import getRequestData from "./utils.js"
 import formidable from "formidable";
 import { FORMERR } from "dns";
 import { time } from "console";
 const __dirname = path.resolve();
+import { encryptPass, createToken, verifyToken } from "./userController.js"
 
 const router = async (req, response) => {
 
@@ -98,6 +99,68 @@ const router = async (req, response) => {
         }
         console.log('pat')
     }
+
+    if (req.url == "/api/user/login" && req.method == "POST") {
+
+        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+            // czytam dane z nagłowka 
+            let token = req.headers.authorization.split(" ")[1]
+            console.log(token)
+        }
+    }
+
+    if (req.url == "/api/user/register" && req.method == "POST") {
+        let data = JSON.parse(await getRequestData(req));
+        console.log(data.name);
+
+        if (data.name == undefined || data.name == "") {
+            return false
+        }
+        if (data.lastName == undefined && data.lastName == "") {
+            return false
+        }
+        if (data.email == undefined && data.email == "") {
+            return false
+        }
+        if (data.password == undefined && data.password == "") {
+            return false
+        }
+        data.password = await encryptPass(data.password)
+        console.log('po', data)
+        users.push(data)
+        let token = await createToken(data)
+        console.log('token', token)
+        data["token"] = token
+        data["confirmed"] = 'false'
+        console.log('users', users)
+
+        response.end(`
+        skopiuj poniższy link do przeglądarki
+        http://localhost:3000/api/user/confirm/${token}
+        w celu potwierdzenia konta
+        Uwaga: link jest ważny przez godzinę`)
+
+        // if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+        //     // czytam dane z nagłowka 
+        //     let token = req.headers.authorization.split(" ")[1]
+        //     console.log(token)
+        // }
+    }
+
+    if (req.url.match("/api/user/confirm") && req.method == "GET") {
+        console.log('get')
+
+        let splited = req.url.split("/")
+        let id = splited[splited.length - 1]
+        for (let i in users) {
+            if (id == users[i].token) {
+                users[i].confirmed = true
+                response.end("Konto zostalo potwierdzone")
+                return false
+            }
+        }
+    }
+
 }
 
 export default router

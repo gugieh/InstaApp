@@ -2,5 +2,9 @@ let photos = [
 
 ];
 
+let users = [
 
-export default photos
+]
+
+
+export default users

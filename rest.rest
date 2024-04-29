@@ -16,3 +16,18 @@ user_albumpppp
 
 ### GET
 GET http://localhost:3000/photos/all HTTP/1.1
+
+### TOKEN
+POST http://localhost:3000/api/user/login HTTP/1.1
+authorization: Bearer eyJhbG.eyJlbWFpbCII6MTY1MjI4NjgzN30.xkXNNho-MxECZsJXCIU
+
+### REGISTER
+POST http://localhost:3000/api/user/register HTTP/1.1
+content-type: application/json
+
+{
+    "name": "name",
+    "lastName": "lastName",
+    "email":"name@email.pl",
+    "password":"password"
+}
