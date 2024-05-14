@@ -6,7 +6,7 @@ import formidable from "formidable";
 import { FORMERR } from "dns";
 import { time } from "console";
 const __dirname = path.resolve();
-import { encryptPass, createToken, verifyToken } from "./userController.js"
+import { encryptPass, createToken, verifyToken, decryptPass } from "./userController.js"
 
 const router = async (req, response) => {
 
@@ -113,6 +113,13 @@ const router = async (req, response) => {
         let data = JSON.parse(await getRequestData(req));
         console.log(data.name);
 
+        for (let i in users) {
+            if (data.email == users[i].email) {
+                console.log('Konto już istnieje')
+                return false
+            }
+        }
+
         if (data.name == undefined || data.name == "") {
             return false
         }
@@ -155,10 +162,43 @@ const router = async (req, response) => {
         for (let i in users) {
             if (id == users[i].token) {
                 users[i].confirmed = true
+                users[i].token = undefined
                 response.end("Konto zostalo potwierdzone")
+                console.log(users)
                 return false
             }
         }
+    }
+
+    if (req.url.match("/api/user/login") && req.method == "POST") {
+        console.log('login')
+        let data = JSON.parse(await getRequestData(req));
+
+        let splited = req.url.split("/")
+        let id = splited[splited.length - 1]
+        for (let i in users) {
+            if (data.email == users[i].email) {
+                let go = await decryptPass(data.password, users[i].password)
+                if (go == true) {
+                    if (users[i].confirmed == true) {
+
+
+                        console.log("Witaj, ", users[i].name)
+                        let token = await createToken(data)
+                        users[i].token = token
+                        console.log('users', users)
+                        return false
+                    }
+                    else {
+                        console.log("potwierdz konto")
+                        return false
+                    }
+                }
+            }
+        }
+
+        console.log("Zły login lub hasło")
+
     }
 
 }

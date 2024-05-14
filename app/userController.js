@@ -12,6 +12,14 @@ const encryptPass = async (password) => {
     // console.log({ encryptedPassword: encryptedPassword });
 }
 
+const decryptPass = async (userpass, encrypted) => {
+    // console.log('user ', userpass, ' bcrypt', encrypted)
+    let decrypted = await compare(userpass, encrypted)
+    // console.log(decrypted);
+    return decrypted
+
+}
+
 const createToken = async (data) => {
 
     let token = await sign(
@@ -35,4 +43,4 @@ const verifyToken = (token) => {
         console.log({ message: ex.message });
     }
 }
-export { encryptPass, createToken, verifyToken }
+export { encryptPass, createToken, verifyToken, decryptPass }
