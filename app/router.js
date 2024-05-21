@@ -1,6 +1,6 @@
 import path from "path";
 import { readFile } from "fs";
-import users from "./model.js"
+import { photos, users } from "./model.js"
 import getRequestData from "./utils.js"
 import formidable from "formidable";
 import { FORMERR } from "dns";
@@ -28,52 +28,52 @@ const router = async (req, response) => {
         }
 
     }
-    if (req.url == "/api/photos" && req.method == "POST") {
+    // if (req.url == "/api/photos" && req.method == "POST") {
 
-        // let data = JSON.parse(await getRequestData(req));
-        // console.log(data);
-        // tasks.push(data)
+    //     // let data = JSON.parse(await getRequestData(req));
+    //     // console.log(data);
+    //     // tasks.push(data)
 
-        // console.log(await getRequestData(req))
-        let form = formidable({});
+    //     // console.log(await getRequestData(req))
+    //     let form = formidable({});
 
-        form.uploadDir = 'upload'       // folder do zapisu zdjęcia
-        form.keepExtensions = true
-        form.parse(req, function (err, fields, files) {
+    //     form.uploadDir = 'upload'       // folder do zapisu zdjęcia
+    //     form.keepExtensions = true
+    //     form.parse(req, function (err, fields, files) {
 
-            console.log("----- przesłane pola z formularza ------");
+    //         console.log("----- przesłane pola z formularza ------");
 
-            console.log(fields.album);
+    //         console.log(fields.album);
 
-            console.log("----- przesłane formularzem pliki ------");
+    //         console.log("----- przesłane formularzem pliki ------");
 
-            console.log(files);
-            let id = Date.now()
-            let album = fields.album
-            console.log(id)
-            let file = files.file
-            console.log(file.name)
-            let data =
-            {
-                "id": id,
-                "album": album,
-                "originalName": file.name,
-                "url": file.path,
-                "lastChange": "original",
-                "history": [
-                    {
-                        "status": "original",
-                        "timestamp": id
-                    }
-                ]
-            }
+    //         console.log(files);
+    //         let id = Date.now()
+    //         let album = fields.album
+    //         console.log(id)
+    //         let file = files.file
+    //         console.log(file.name)
+    //         let data =
+    //         {
+    //             "id": id,
+    //             "album": album,
+    //             "originalName": file.name,
+    //             "url": file.path,
+    //             "lastChange": "original",
+    //             "history": [
+    //                 {
+    //                     "status": "original",
+    //                     "timestamp": id
+    //                 }
+    //             ]
+    //         }
 
-            photos.push(data)
+    //         photos.push(data)
 
-            response.end("plik przesłany!")
-        });
+    //         response.end("plik przesłany!")
+    //     });
 
-    }
+    // }
 
     if (req.url.match(/\/api\/tasks\/([0-9]+)/) && req.method == "DELETE") {
         let splited = req.url.split("/")

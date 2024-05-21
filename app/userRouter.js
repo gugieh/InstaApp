@@ -1,6 +1,6 @@
 import path from "path";
 import { readFile } from "fs";
-import users from "./model.js"
+import { photos, users } from "./model.js"
 import getRequestData from "./utils.js"
 import formidable from "formidable";
 import { FORMERR } from "dns";

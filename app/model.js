@@ -7,4 +7,4 @@ let users = [
 ]
 
 
-export default users
+export { photos, users }

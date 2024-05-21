@@ -10,7 +10,6 @@ import imageRouter from './app/fileController .js';
 createServer(async (req, res) => {
 
     //images
-
     if (req.url.search("/api/photos") != -1) {
         await imageRouter(req, res)
     }
