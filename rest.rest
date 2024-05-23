@@ -52,4 +52,24 @@ content-type: application/json
 
 
 ### Jedno zdjecie
-GET http://localhost:3000/api/photos/123 HTTP/1.1
+GET http://localhost:3000/api/photos/1716462934513 HTTP/1.1
+
+### Update zdjecia
+PATCH http://localhost:3000/api/photos/1716465847260 HTTP/1.1
+Content-Type: multipart/form-data; boundary=----FormBoundary1234
+
+------FormBoundary1234
+Content-Disposition: form-data; name="file"; filename="input.jpg"
+Content-Type: image/jpeg
+
+< ./input.jpg
+
+------FormBoundary1234
+Content-Disposition: form-data; name="album"
+Content-Type: text/plain
+
+user_albumpppp
+------FormBoundary1234
+
+### DELETE zdjecia
+DELETE http://localhost:3000/api/photos/1716465847260 HTTP/1.1

@@ -2,7 +2,8 @@ import { createServer } from 'http';
 import router from "./app/router.js";
 import usersRouter from "./app/userRouter.js"
 import 'dotenv/config'
-import imageRouter from './app/fileController .js';
+import { imageRouter, selectImageRouter } from './app/fileController .js';
+import { photos, users } from "./app/model.js"
 
 // createServer((req, res) => router(req, res))
 //     .listen(process.env.APP_PORT, () => console.log("listen"))
@@ -24,6 +25,9 @@ createServer(async (req, res) => {
 
     else if (req.url.search("/api/user") != -1) {
         await usersRouter(req, res)
+    }
+    if (req.url.match(/\/api\/photos\/([0-9]+)/)) {
+        await selectImageRouter(req, res)
     }
 
 })
