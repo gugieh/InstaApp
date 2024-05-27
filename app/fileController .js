@@ -96,7 +96,23 @@ const selectImageRouter = async (req, res) => {
         let id = splited[splited.length - 1]
         for (let i in photos) {
             if (id == photos[i].id) {
-                photos[i].album = "new album"
+                let form = formidable({});
+
+                form.uploadDir = 'upload'       // folder do zapisu zdjęcia
+                form.keepExtensions = true
+                form.parse(req, function (err, fields, files) {
+
+                    console.log("----- przesłane pola z formularza ------");
+
+                    console.log(fields);
+
+                    console.log("----- przesłane formularzem pliki ------");
+
+                    console.log(files);
+                    photos[i].album = fields.album
+                    photos[i].url = files.file.path
+                    res.end("plik przesłany!")
+                });
                 let split = photos[i].lastChange.split(" ")
                 let change = split[split.length - 2]
                 if (change == undefined) {
@@ -126,6 +142,7 @@ const selectImageRouter = async (req, res) => {
                 return false
             }
         }
+        res.end(`"message": "photo with id 1711195846479x not found"`)
     }
 }
 export { imageRouter, selectImageRouter }
