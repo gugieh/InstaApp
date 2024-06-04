@@ -16,19 +16,11 @@ export default {
         return {
         }
     },
-    // created() {
-    //     this.$store.dispatch("FETCH_PHOTOS")
-    // }
-    // ,
-    // computed: {
-    //     load() {
-    //         return this.$store.getters.GET_PHOTOS_LIST
-    //     },
-    //     checkLoading() {
-    //         return this.$store.getters.GET_PHOTOS_LOADING
-    //     }
-    // }
-    // ,
+    created() {
+        if (!localStorage.getItem("token")) {
+            this.$router.push({ path: "/" });
+        }
+    },
     components: {
       Header,
       Footer,

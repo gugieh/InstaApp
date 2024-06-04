@@ -18,9 +18,14 @@ const router = createRouter({
             component: Insta,
             children: [
                 // { path: "photo/:id", name: "photo", component: Photo },
-                { path: "upload", name: "upload", component: Upload },
+                // { path: "upload", name: "upload", component: Upload },
                 // { path: "profile", name: "profile", component: Profile }
             ]
+        },
+        {
+            path: '/upload',
+            name: 'upload',
+            component: Upload
         }
     ]
 })

@@ -4,7 +4,7 @@
   
       <ul class="menu">
         <li>
-          <RouterLink :to="`/insta/upload`" class="menu-link">Upload</RouterLink>
+          <RouterLink :to="`/upload`" class="menu-link">Upload</RouterLink>
         </li>
         <li>
           <RouterLink :to="`/insta`" class="menu-link">Home</RouterLink>

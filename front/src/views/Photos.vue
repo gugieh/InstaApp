@@ -9,7 +9,9 @@
         <div class="modal-content" @click.stop>
           <span class="close" @click="closeModal">&times;</span>
           <img :src="selectedImage" alt="Selected image" />
-            <div v-for="(tag, index) in tags" :key="index">{{ tag }}, </div>
+          <div>
+            <a style="margin-right: 5px;" v-for="(tag, index) in tags" :key="index">{{ tag }} </a>
+          </div>
         </div>
       </div>
     </div>
