@@ -1,10 +1,10 @@
 import axios from 'axios';
-const profule = {
-    async getprofile() {
+const profile = {
+    async getProfile(email) {
         console.log('Sending registration request');
         try {
             console.log('Request payload:');
-            const response = await axios.get(`http://localhost:3000/api/photos/all`);
+            const response = await axios.get(`http://localhost:3000/api/user/single/${email}`);
             console.log('Response received');
             console.log(response);
             if (response.status === 200) {
@@ -20,3 +20,4 @@ const profule = {
         }
     }
 }
+export default profile;

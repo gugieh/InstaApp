@@ -18,7 +18,7 @@ const login = async (email, password) => {
             //     return { success: true, message: response.message };
 
             // }
-            return { success: response.data.success, message: response.data.message };
+            return { success: response.data.success, message: response.data.message, token: response.data.token };
         } else {
             console.error('Request failed with status:', response.status);
             return false;

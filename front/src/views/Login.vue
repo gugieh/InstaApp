@@ -85,6 +85,8 @@ import login from '../store/login.js';
             if (result.success) {
               console.log('Login successful! okok');
               localStorage.setItem("token", result.token)
+              localStorage.setItem("email", this.email)
+              console.log(this.email,'Login', result.token);
               this.$router.push({ path: "/insta" });
             } else {
               this.message = result.message;

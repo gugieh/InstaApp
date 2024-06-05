@@ -88,7 +88,7 @@ content-type: application/json
 }
 
 ### Update zdjecia profilu
-PATCH http://localhost:3000/api/user/profile/icon/name@email.pl HTTP/1.1
+PATCH http://localhost:3000/api/user/profile/icon/a@a.pl HTTP/1.1
 Content-Type: multipart/form-data; boundary=----FormBoundary1234
 
 ------FormBoundary1234
@@ -98,3 +98,6 @@ Content-Type: image/jpeg
 < ./input.jpg
 
 ------FormBoundary1234
+
+### get single user
+GET http://localhost:3000/api/user/single/a@a.pl HTTP/1.1

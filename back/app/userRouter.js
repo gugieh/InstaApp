@@ -195,25 +195,18 @@ const usersRouter = async (req, response) => {
                 });
             }
         }
-        // let form = formidable({});
+    }
 
-        // form.uploadDir = 'upload'       // folder do zapisu zdjęcia
-        // form.keepExtensions = true
-        // form.parse(req, function (err, fields, files) {
-
-        //     console.log("----- przesłane pola z formularza ------");
-
-        //     console.log(fields.album);
-
-        //     console.log("----- przesłane formularzem pliki ------");
-        //     let file = files.file
-        //     const fileUrl = path.basename(file.path);
-        //     users.icon = fileUrl
-
-        //     photos.push(data)
-        //     console.log('fptp', photos)
-        //     res.end(JSON.stringify({ success: true, message: "Przesłano plik", image: id }))
-        // });
+    if (req.url.match(/\/api\/user\/single\/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/) && req.method === "GET") {
+        let splited = req.url.split("/")
+        let mail = splited[splited.length - 1]
+        console.log(mail)
+        for (let i in users) {
+            if (mail == users[i].email) {
+                console.log(users[i])
+                response.end(JSON.stringify(users[i]))
+            }
+        }
     }
 
 }
