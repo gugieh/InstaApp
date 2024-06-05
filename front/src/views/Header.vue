@@ -10,7 +10,7 @@
           <RouterLink :to="`/insta`" class="menu-link">Home</RouterLink>
         </li>
         <li>
-          <RouterLink :to="`/insta/profile`" class="menu-link">Profile</RouterLink>
+          <RouterLink :to="`/profile`" class="menu-link">Profile</RouterLink>
         </li>
         <li>
           <div @click="logout" class="menu-link"><a class="menu-link" href="#">Logout</a></div>

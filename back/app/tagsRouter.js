@@ -57,9 +57,5 @@ const tagsRouter = async (req, res) => {
         res.end(JSON.stringify(tags))
         console.log(tags)
     }
-    // else if (req.url.match(/\/api\/tags\/photos\/([0-9]+)/) && req.method == "PATCH") {
-    //     console.log('lil niga')
-    // }
-
 }
 export { tagsRouter }

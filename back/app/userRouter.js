@@ -58,6 +58,7 @@ const usersRouter = async (req, response) => {
         console.log('token', token)
         data["token"] = token
         data["confirmed"] = 'false'
+        data["icon"] = 'icon.png'
         console.log('users', users)
 
         response.end(`
@@ -135,5 +136,85 @@ const usersRouter = async (req, response) => {
         console.log(users)
 
     }
+
+    // else if (req.url.match(req.url.match(/\/api\/user\/profile\/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/)) && req.method == "PATCH") {
+    //     let splited = req.url.split("/")
+    //     let id = splited[splited.length - 1]
+    //     console.log(id)
+    // }
+    if (req.url.match(/\/api\/user\/profile\/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/) && req.method === "PATCH") {
+        let splited = req.url.split("/")
+        let mail = splited[splited.length - 1]
+        let data = JSON.parse(await getRequestData(req));
+        for (let i in users) {
+            if (mail == users[i].email) {
+                if (data.name !== undefined && data.name !== "") {
+                    users[i].name = data.name
+                }
+                if (data.lastName !== undefined && data.lastName !== "") {
+                    users[i].lastName = data.lastName
+                }
+                if (data.email !== undefined && data.email !== "") {
+                    if (data.email !== users[i].email) {
+                        for (let j in users) {
+                            if (data.email == users[j].email) {
+                                response.end("Konto już istnieje")
+                                return false
+                            }
+                        }
+                        users[i].email = data.email
+                    }
+
+                }
+                if (data.password !== undefined && data.password !== "") {
+                    let password = await encryptPass(data.password)
+                    users[i].password = password
+                }
+                response.end("Dane zostały zmienione")
+                console.log(users)
+                return false
+            }
+        }
+
+    }
+
+    if (req.url.match(/\/api\/user\/profile\/icon\/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/) && req.method === "PATCH") {
+        let splited = req.url.split("/")
+        let mail = splited[splited.length - 1]
+        for (let i in users) {
+            if (mail == users[i].email) {
+                let form = formidable({});
+                form.uploadDir = 'upload'       // folder do zapisu zdjęcia
+                form.keepExtensions = true
+                form.parse(req, function (err, fields, files) {
+                    let file = files.file
+                    const fileUrl = path.basename(file.path);
+                    users[i].icon = fileUrl
+                    response.end("Zdjęcie zostało zmienione")
+                    console.log(users)
+                });
+            }
+        }
+        // let form = formidable({});
+
+        // form.uploadDir = 'upload'       // folder do zapisu zdjęcia
+        // form.keepExtensions = true
+        // form.parse(req, function (err, fields, files) {
+
+        //     console.log("----- przesłane pola z formularza ------");
+
+        //     console.log(fields.album);
+
+        //     console.log("----- przesłane formularzem pliki ------");
+        //     let file = files.file
+        //     const fileUrl = path.basename(file.path);
+        //     users.icon = fileUrl
+
+        //     photos.push(data)
+        //     console.log('fptp', photos)
+        //     res.end(JSON.stringify({ success: true, message: "Przesłano plik", image: id }))
+        // });
+    }
+
 }
 export default usersRouter
