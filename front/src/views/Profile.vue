@@ -1,6 +1,6 @@
 <template>
     <div class="page-container">
-    <Header />
+        <Header />
         <div class="content-wrapper">
             <div class="profile-container">
                 <h2>Profile</h2>
@@ -14,24 +14,36 @@
                             <a @click="showEditForm = !showEditForm"> Zmień dane</a>
                         </div>
                         <div class="email">
-                            {{ email }}
+                            {{ email }} <a @click="showEditForm2 = !showEditForm2"> Zmień dane</a>
                         </div>
                     </div>
                     <div class="modal-overlay" v-if="showEditForm" @click="showEditForm = false"></div>
-                        <div class="modal" v-if="showEditForm">
-                            <div class="modal-content">
-                                <input type="text" v-model="editedName" placeholder="Imię" />
-                                <input type="text" v-model="editedLastName" placeholder="Nazwisko" />
-                                <button @click="saveChanges">Zapisz</button>
-                            </div>
+                    <div class="modal" v-if="showEditForm">
+                        <div class="modal-content">
+                            <label for="name">Imię</label>
+                            <input type="text" v-model="editedName" placeholder="Imię" />
+                            <label for="lastName">Nazwisko</label>
+                            <input type="text" v-model="editedLastName" placeholder="Nazwisko" />
+                            <button @click="saveChanges">Zapisz</button>
                         </div>
+                    </div>
+                    <div class="modal-overlay" v-if="showEditForm2" @click="showEditForm2 = false"></div>
+                    <div class="modal" v-if="showEditForm2">
+                        <form @submit.prevent="saveChanges">
+                            <div class="modal-content">
+                                <label for="email">E-mail</label>
+                                <input type="email" v-model="editedEmail" id="email" placeholder="Email" required />
+                                <button type="submit">Zapisz</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    <Footer />
+        <Footer />
     </div>
 </template>
-  
+
 <script>
 import Header from "./Header.vue";
 import Footer from "./Footer.vue";
@@ -46,7 +58,9 @@ export default {
             icon: "",
             editedName: "",
             editedLastName: "",
-            showEditForm: false
+            editedEmail: "",
+            showEditForm: false,
+            showEditForm2: false
         };
     },
     methods: {
@@ -67,11 +81,16 @@ export default {
                 name: this.editedName,
                 lastName: this.editedLastName
             };
-            // const response = await profile.updateProfile(newData);
-            // console.log(response);
-            this.name = this.editedName;
-            this.lastName = this.editedLastName;
+            const response = await profile.updateProfile(this.email, this.editedName, this.editedLastName, this.editedEmail);
+            console.log(response);
+            if (response) {
+                this.name = this.editedName;
+                this.lastName = this.editedLastName;
+                this.email = this.editedEmail;
+                localStorage.setItem("email", this.email)
+            }
             this.showEditForm = false;
+            this.showEditForm2 = false;
         }
     },
     components: {
@@ -83,7 +102,7 @@ export default {
     }
 };
 </script>
-  
+
 <style scoped>
 .page-container {
     display: flex;
@@ -127,6 +146,7 @@ label {
 }
 
 input[type="file"],
+input[type="email"],
 input[type="text"] {
     width: 100%;
     padding: 12px;
@@ -172,7 +192,7 @@ button:hover {
     margin-top: 20px;
 }
 
-.profile-icon img{
+.profile-icon img {
     max-width: 200px;
     max-height: 200px;
     width: auto;
@@ -186,8 +206,10 @@ button:hover {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Przyciemnienie tła */
-    z-index: 999; /* Wysokie indeksowanie, aby nakładka była nad treścią */
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Przyciemnienie tła */
+    z-index: 999;
+    /* Wysokie indeksowanie, aby nakładka była nad treścią */
 }
 
 .modal {
@@ -198,7 +220,8 @@ button:hover {
     background-color: white;
     padding: 20px;
     border-radius: 5px;
-    z-index: 1000; /* Wyższy indeks niż tło, aby modal był nad nakładką */
+    z-index: 1000;
+    /* Wyższy indeks niż tło, aby modal był nad nakładką */
 }
 
 .modal-content input {
@@ -221,4 +244,3 @@ button:hover {
     background-color: #45a049;
 }
 </style>
-  

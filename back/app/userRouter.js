@@ -146,6 +146,7 @@ const usersRouter = async (req, response) => {
         let splited = req.url.split("/")
         let mail = splited[splited.length - 1]
         let data = JSON.parse(await getRequestData(req));
+        console.log('update')
         for (let i in users) {
             if (mail == users[i].email) {
                 if (data.name !== undefined && data.name !== "") {
