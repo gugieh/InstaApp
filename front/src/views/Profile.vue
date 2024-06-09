@@ -6,7 +6,7 @@
                 <h2>Profile</h2>
                 <div class="profile">
                     <div class="profile-icon">
-                        <img @click="showImageForm = !showImageForm" id="edit" src="https://cdn.discordapp.com/attachments/946494224000487448/1248726670714736661/image.png?ex=6664b6d6&is=66636556&hm=0fd5a76f29abe64f128d82e6735677510a253c9e0cfcd160829f049ad5801d2a&" alt="edit"/>
+                        <img @click="showImageForm = !showImageForm" id="edit" :src="filterEdit" alt="edit"/>
                         <img :src="icon" alt="Profile icon" />
                     </div>
                     <div class="profile-info">
@@ -96,7 +96,8 @@ export default {
             editedOldPassword: "",
             editedPassword: "",
             editedPassword2: "",
-            showImageForm: false
+            showImageForm: false,
+            filterEdit: "http://localhost:3000/upload/image.png"
         };
     },
     methods: {
