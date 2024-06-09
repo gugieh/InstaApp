@@ -222,8 +222,12 @@ const usersRouter = async (req, response) => {
                 if (go == true) {
                     let password = await encryptPass(data.newPassword)
                     users[i].password = password
-                    response.end("Hasło zostało zmienione")
+                    response.end(JSON.stringify({ success: true, message: "Hasło zostało zmienione" }))
                     console.log(users)
+                    return false
+                }
+                else {
+                    response.end(JSON.stringify({ success: false, message: "Złe hasło" }))
                     return false
                 }
             }

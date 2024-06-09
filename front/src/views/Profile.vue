@@ -51,7 +51,9 @@
                                 <input type="password" v-model="editedPassword" id="password" placeholder="Hasło" required />
                                 <label for="password2">Powtórz hasło</label>
                                 <input type="password" v-model="editedPassword2" id="password2" placeholder="Powtórz hasło" required />
+                                <p style="color: red; margin-bottom: 10px;">{{ message }}</p>
                                 <button type="submit">Zapisz</button>
+                                
                             </div>
                         </form>
                     </div>
@@ -97,7 +99,8 @@ export default {
             editedPassword: "",
             editedPassword2: "",
             showImageForm: false,
-            filterEdit: "http://localhost:3000/upload/image.png"
+            filterEdit: "http://localhost:3000/upload/image.png",
+            message: ""
         };
     },
     methods: {
@@ -135,9 +138,12 @@ export default {
                 if(this.editedPassword == this.editedPassword2){
                     const response = await profile.updatePassword(this.email, this.editedOldPassword, this.editedPassword);
                     console.log(response);
+                    if (response.data.success) {
+                        this.showEditForm3 = false;
+                    }
+                    this.message = response.data.message;
                 }
             }
-            this.editedEmail3 = false;
         },
         async updateIcon(){
             const file = this.$refs.fileInput.files[0];
