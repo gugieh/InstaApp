@@ -191,7 +191,8 @@ const usersRouter = async (req, response) => {
                     let file = files.file
                     const fileUrl = path.basename(file.path);
                     users[i].icon = fileUrl
-                    response.end("Zdjęcie zostało zmienione")
+                    // response.end("Zdjęcie zostało zmienione")
+                    response.end(JSON.stringify({ success: true, message: "Zdjęcie zostało zmienione", icon: fileUrl }))
                     console.log(users)
                 });
             }
@@ -206,6 +207,25 @@ const usersRouter = async (req, response) => {
             if (mail == users[i].email) {
                 console.log(users[i])
                 response.end(JSON.stringify(users[i]))
+            }
+        }
+    }
+
+    if (req.url.match(/\/api\/user\/profile\/password\/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/) && req.method === "PATCH") {
+        let splited = req.url.split("/")
+        let mail = splited[splited.length - 1]
+        let data = JSON.parse(await getRequestData(req));
+        console.log(mail)
+        for (let i in users) {
+            if (mail == users[i].email) {
+                let go = await decryptPass(data.oldPassword, users[i].password)
+                if (go == true) {
+                    let password = await encryptPass(data.newPassword)
+                    users[i].password = password
+                    response.end("Hasło zostało zmienione")
+                    console.log(users)
+                    return false
+                }
             }
         }
     }

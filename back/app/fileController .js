@@ -47,6 +47,7 @@ const imageRouter = async (req, res) => {
                 "id": id,
                 "album": album,
                 "originalName": file.name,
+                "filter": "none",
                 "url": fileUrl,
                 "lastChange": "original",
                 "history": [
@@ -177,6 +178,20 @@ const imageRouter = async (req, res) => {
             if (id == photos[i].id) {
                 res.end(JSON.stringify(photos[i].tags))
                 console.log(photos[i].tags)
+            }
+        }
+    }
+    else if (req.url.match(/\/api\/photos\/edit\/([0-9]+)/) && req.method == "PATCH") {
+        console.log('PATCH')
+        let splited = req.url.split("/")
+        let id = splited[splited.length - 1]
+        for (let i in photos) {
+            if (id == photos[i].id) {
+                let data = await getRequestData(req)
+                data = JSON.parse(data)
+                photos[i].filter = data.filter
+                res.end(JSON.stringify(photos[i]))
+                console.log(photos[i])
             }
         }
     }

@@ -6,6 +6,7 @@
                 <h2>Profile</h2>
                 <div class="profile">
                     <div class="profile-icon">
+                        <img @click="showImageForm = !showImageForm" id="edit" src="https://cdn.discordapp.com/attachments/946494224000487448/1248726670714736661/image.png?ex=6664b6d6&is=66636556&hm=0fd5a76f29abe64f128d82e6735677510a253c9e0cfcd160829f049ad5801d2a&" alt="edit"/>
                         <img :src="icon" alt="Profile icon" />
                     </div>
                     <div class="profile-info">
@@ -16,6 +17,9 @@
                         <div class="email">
                             {{ email }} <a @click="showEditForm2 = !showEditForm2"> Zmień dane</a>
                         </div>
+                        <div class="password">
+                            <a @click="showEditForm3 = !showEditForm3">Zmień hasło</a>
+                        </div>        
                     </div>
                     <div class="modal-overlay" v-if="showEditForm" @click="showEditForm = false"></div>
                     <div class="modal" v-if="showEditForm">
@@ -34,6 +38,33 @@
                                 <label for="email">E-mail</label>
                                 <input type="email" v-model="editedEmail" id="email" placeholder="Email" required />
                                 <button type="submit">Zapisz</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-overlay" v-if="showEditForm3" @click="showEditForm3 = false"></div>
+                    <div class="modal" v-if="showEditForm3">
+                        <form @submit.prevent="savePassword">
+                            <div class="modal-content">
+                                <label for="oldpassword">Stare hasło</label>
+                                <input type="password" v-model="editedOldPassword" id="oldpassword" placeholder="Stare hasło" required />
+                                <label for="password">Nowe hasło</label>
+                                <input type="password" v-model="editedPassword" id="password" placeholder="Hasło" required />
+                                <label for="password2">Powtórz hasło</label>
+                                <input type="password" v-model="editedPassword2" id="password2" placeholder="Powtórz hasło" required />
+                                <button type="submit">Zapisz</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-overlay" v-if="showImageForm" @click="showImageForm = false"></div>
+                    <div class="modal" v-if="showImageForm">
+                        <h2>Upload Icon</h2>
+                        <form @submit.prevent="updateIcon" enctype="multipart/form-data">
+                            <div class="form-group">
+                            <label for="file">Choose File:</label>
+                            <input type="file" id="file" ref="fileInput" accept=".jpg, .jpeg, .png" required />
+                            </div>                            
+                            <div class="form-group">
+                            <button type="submit" class="upload-button">Upload</button>
                             </div>
                         </form>
                     </div>
@@ -60,7 +91,12 @@ export default {
             editedLastName: "",
             editedEmail: "",
             showEditForm: false,
-            showEditForm2: false
+            showEditForm2: false,
+            showEditForm3: false,
+            editedOldPassword: "",
+            editedPassword: "",
+            editedPassword2: "",
+            showImageForm: false
         };
     },
     methods: {
@@ -77,20 +113,38 @@ export default {
             this.editedLastName = this.lastName;
         },
         async saveChanges() {
-            const newData = {
-                name: this.editedName,
-                lastName: this.editedLastName
-            };
             const response = await profile.updateProfile(this.email, this.editedName, this.editedLastName, this.editedEmail);
             console.log(response);
             if (response) {
-                this.name = this.editedName;
-                this.lastName = this.editedLastName;
-                this.email = this.editedEmail;
-                localStorage.setItem("email", this.email)
+                if (this.editedName != "" && this.editedName != null) {
+                    this.name = this.editedName;
+                    this.lastName = this.editedLastName;
+                }
+                if (this.editedEmail != "" && this.editedEmail != null){
+                    this.email = this.editedEmail;
+                    localStorage.setItem("email", this.email)
+                }
+                
             }
             this.showEditForm = false;
             this.showEditForm2 = false;
+        },
+        async savePassword(){
+            if(this.editedOldPassword != "" && this.editedPassword != "" && this.editedPassword2 != ""){
+                if(this.editedPassword == this.editedPassword2){
+                    const response = await profile.updatePassword(this.email, this.editedOldPassword, this.editedPassword);
+                    console.log(response);
+                }
+            }
+            this.editedEmail3 = false;
+        },
+        async updateIcon(){
+            const file = this.$refs.fileInput.files[0];
+            console.log("Selected file:", file);
+            const response = await profile.updateIcon(this.email, file);
+            // console.log(response);
+            this.icon = "http://localhost:3000/upload/" + response.icon;
+            this.showImageForm = false;
         }
     },
     components: {
@@ -242,5 +296,12 @@ button:hover {
 
 .modal-content button:hover {
     background-color: #45a049;
+}
+
+#edit{
+    width: 20px;
+    height: 20px;
+    position: absolute;
+    cursor: pointer;
 }
 </style>

@@ -101,3 +101,14 @@ Content-Type: image/jpeg
 
 ### get single user
 GET http://localhost:3000/api/user/single/a@a.pl HTTP/1.1
+
+### update password
+PATCH  http://localhost:3000/api/user/profile/password/a@a.pl HTTP/1.1
+
+### Update filter
+PATCH http://localhost:3000/api/photos/edit/1717858155853 HTTP/1.1
+content-type: application/json
+
+{
+    "filter": "sepia"
+}
