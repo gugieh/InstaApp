@@ -7,6 +7,7 @@ import { CONNREFUSED, FORMERR } from "dns";
 import { time } from "console";
 const __dirname = path.resolve();
 import { encryptPass, createToken, verifyToken, decryptPass } from "./userController.js"
+import { collection } from "./config.js";
 
 const usersRouter = async (req, response) => {
     // if (req.url == "/api/user/login" && req.method == "POST") {
@@ -31,39 +32,63 @@ const usersRouter = async (req, response) => {
         let data = JSON.parse(await getRequestData(req));
         console.log(data.name);
 
-        for (let i in users) {
-            if (data.email == users[i].email) {
-                console.log('Konto już istnieje')
-                response.end("Konto już istnieje")
-                return false
-            }
+        const datadb = {
+            email: data.email,
+            name: data.name,
+            lastName: data.lastName,
+            password: data.password,
+            token: '',
+            confirmed: false,
+            icon: 'icon.png'
         }
+    
+        // Check if the username already exists in the database
+        const existingUser = await collection.findOne({ email: datadb.email });
+    
+        if (existingUser) {
+            response.end('User already exists. Please choose a different username.');
+        } else {    
+            datadb.password = await encryptPass(data.password); // Replace the original password with the hashed one
+            datadb.token = await createToken(data)
+            console.log('token', datadb.token)
 
-        if (data.name == undefined || data.name == "") {
-            return false
+            const userdata = await collection.insertMany(datadb);
+            console.log(userdata);
         }
-        if (data.lastName == undefined && data.lastName == "") {
-            return false
-        }
-        if (data.email == undefined && data.email == "") {
-            return false
-        }
-        if (data.password == undefined && data.password == "") {
-            return false
-        }
-        data.password = await encryptPass(data.password)
-        console.log('po', data)
-        users.push(data)
-        let token = await createToken(data)
-        console.log('token', token)
-        data["token"] = token
-        data["confirmed"] = 'false'
-        data["icon"] = 'icon.png'
-        console.log('users', users)
+        
+        // for (let i in users) {
+        //     if (data.email == users[i].email) {
+        //         console.log('Konto już istnieje')
+        //         response.end("Konto już istnieje")
+        //         return false
+        //     }
+        // }
+
+        // if (data.name == undefined || data.name == "") {
+        //     return false
+        // }
+        // if (data.lastName == undefined && data.lastName == "") {
+        //     return false
+        // }
+        // if (data.email == undefined && data.email == "") {
+        //     return false
+        // }
+        // if (data.password == undefined && data.password == "") {
+        //     return false
+        // }
+        // data.password = await encryptPass(data.password)
+        // console.log('po', data)
+        // users.push(data)
+        // let token = await createToken(data)
+        // console.log('token', token)
+        // data["token"] = token
+        // data["confirmed"] = 'false'
+        // data["icon"] = 'icon.png'
+        // console.log('users', users)
 
         response.end(`
         skopiuj poniższy link do przeglądarki
-        http://localhost:3000/api/user/confirm/${token}
+        http://localhost:3000/api/user/confirm/${datadb.token}
         w celu potwierdzenia konta
         Uwaga: link jest ważny przez godzinę`)
 
@@ -79,14 +104,32 @@ const usersRouter = async (req, response) => {
 
         let splited = req.url.split("/")
         let id = splited[splited.length - 1]
-        for (let i in users) {
-            if (id == users[i].token) {
-                users[i].confirmed = true
-                users[i].token = undefined
+        // for (let i in users) {
+        //     if (id == users[i].token) {
+        //         users[i].confirmed = true
+        //         users[i].token = undefined
+        //         response.end("Konto zostalo potwierdzone")
+        //         console.log(users)
+        //         return false
+        //     }
+        // }
+        try {
+            const check = await collection.findOne({ token: id });
+            if (!check) {
+                res.send("Invalid token");
+            }
+            else {
+                await collection.updateOne(
+                    { token: id},           
+                    { $set: { confirmed: true } }
+                );
                 response.end("Konto zostalo potwierdzone")
                 console.log(users)
                 return false
             }
+        }
+        catch {
+            res.send("wrong Details");
         }
     }
 
@@ -94,30 +137,57 @@ const usersRouter = async (req, response) => {
         console.log('login')
         let data = JSON.parse(await getRequestData(req));
 
-        let splited = req.url.split("/")
-        let id = splited[splited.length - 1]
-        for (let i in users) {
-            if (data.email == users[i].email) {
-                let go = await decryptPass(data.password, users[i].password)
-                if (go == true) {
-                    if (users[i].confirmed == true) {
+        // let splited = req.url.split("/")
+        // let id = splited[splited.length - 1]
+        // for (let i in users) {
+        //     if (data.email == users[i].email) {
+        //         let go = await decryptPass(data.password, users[i].password)
+        //         if (go == true) {
+        //             if (users[i].confirmed == true) {
 
 
-                        console.log("Witaj, ", users[i].name)
-                        let token = await createToken(data)
-                        users[i].token = token
-                        console.log('users', users)
-                        response.end(JSON.stringify({ success: true, message: "Witaj, " + users[i].name, token: token }))
-                        return false
-                    }
-                    else {
-                        response.end(JSON.stringify({ success: false, message: "potwierdz konto" }))
-                        console.log("potwierdz konto")
-                        return false
-                    }
-                }
+        //                 console.log("Witaj, ", users[i].name)
+        //                 let token = await createToken(data)
+        //                 users[i].token = token
+        //                 console.log('users', users)
+        //                 response.end(JSON.stringify({ success: true, message: "Witaj, " + users[i].name, token: token }))
+        //                 return false
+        //             }
+        //             else {
+        //                 response.end(JSON.stringify({ success: false, message: "potwierdz konto" }))
+        //                 console.log("potwierdz konto")
+        //                 return false
+        //             }
+        //         }
+        //     }
+        // }
+
+        const check = await collection.findOne({ email: data.email });
+        if (!check || check == null) {
+            response.end(JSON.stringify({ success: false, message: "Zły login lub hasło" }))
+            return false
+        }
+            // Compare the hashed password from the database with the plaintext password
+        let go = await decryptPass(data.password, check.password)
+        if (go == true) {
+            if (check.confirmed == true) {
+                console.log("Witaj, ", check.name)
+                let token = await createToken(data)
+                await collection.updateOne(
+                    { email: data.email },           
+                    { $set: { token: token } }
+                );
+                console.log('users', check)
+                response.end(JSON.stringify({ success: true, message: "Witaj, " + check.name, token: token }))
+                return false
+            }
+            else {
+                response.end(JSON.stringify({ success: false, message: "potwierdz konto" }))
+                console.log("potwierdz konto")
+                return false
             }
         }
+
         response.end(JSON.stringify({ success: false, message: "Zły login lub hasło" }))
         console.log("Zły login lub hasło")
 

@@ -48,10 +48,11 @@ export default {
   methods: {
     async submitForm() {
       try {
+        let email = localStorage.getItem("email");
         const file = this.$refs.fileInput.files[0];
         console.log("Selected file:", file);
         console.log("Tags:", this.tags);
-        const result = await sendPhoto(this.album, file);
+        const result = await sendPhoto(this.album, file, email);
         console.log(result.image);
         for (let i = 0; i < this.tags.length; i++) {
           await createTag(this.tags[i]);

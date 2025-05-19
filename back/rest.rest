@@ -112,3 +112,7 @@ content-type: application/json
 {
     "filter": "sepia"
 }
+
+
+### GET all email
+GET http://localhost:3000/api/photos/1730062030512 HTTP/1.1

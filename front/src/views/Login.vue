@@ -1,6 +1,6 @@
 <template>
     <div class="register-container">
-      <div v-if="this.show" class="register">
+      <div v-if="!this.show" class="register">
         <h1>Register</h1>
         <form  @submit.prevent="reg">
           <div class="form-group">
@@ -25,7 +25,7 @@
         <p v-if="message">{{ message }}</p>
       </div>
 
-      <div  v-if="!this.show" class="login">
+      <div  v-if="this.show" class="login">
       <h1>Login</h1>
       <form @submit.prevent="log">
         <div class="form-group">

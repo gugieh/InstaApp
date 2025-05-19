@@ -51,8 +51,9 @@ export default {
   },
   methods: {
     async eee() {
+      let email = localStorage.getItem("email");
       this.images = [];
-      const result = await getPhotos();
+      const result = await getPhotos(email);
       for (let i = 0; i < result.data.length; i++) {
         let url = "http://localhost:3000/upload/" + result.data[i].url;
         let image = {
@@ -66,11 +67,12 @@ export default {
     },
     async singleImage(id) {
       const result = await getSinglePhoto(id);
-      this.selectedImage = "http://localhost:3000/upload/" + result.data.url;
-      result.data.tags.forEach(tag => {
+      this.selectedImage = "http://localhost:3000/upload/" + result.data[0].url;
+      // console.log('tag', result.data[0].tags)
+      result.data[0].tags.forEach(tag => {
         this.tags.push(tag.name);
       });
-      this.selectedImageFilter = result.data.filter;
+      this.selectedImageFilter = result.data[0].filter;
       this.showModal = true;
       this.selectedImageId = id;
     },
