@@ -38,6 +38,13 @@ const verifyToken = (token) => {
     try {
         let decoded = verify(token, "verysecretkey")
         console.log({ decoded: decoded });
+        let nowInSeconds = Math.floor(Date.now() / 1000);
+
+        if (nowInSeconds <= decoded.exp){
+            return true
+        }
+        return false
+
     }
     catch (ex) {
         console.log({ message: ex.message });

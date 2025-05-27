@@ -19,14 +19,14 @@ const usersRouter = async (req, response) => {
     //     }
 
     // }
-    if (req.url == "/api/user/login" && req.method == "POST") {
+    // if (req.url == "/api/user/login" && req.method == "POST") {
 
-        if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
-            // czytam dane z nagłowka 
-            let token = req.headers.authorization.split(" ")[1]
-            console.log(token)
-        }
-    }
+    //     if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
+    //         // czytam dane z nagłowka 
+    //         let token = req.headers.authorization.split(" ")[1]
+    //         console.log(token)
+    //     }
+    // }
 
     if (req.url == "/api/user/register" && req.method == "POST") {
         let data = JSON.parse(await getRequestData(req));
@@ -137,31 +137,6 @@ const usersRouter = async (req, response) => {
         console.log('login')
         let data = JSON.parse(await getRequestData(req));
 
-        // let splited = req.url.split("/")
-        // let id = splited[splited.length - 1]
-        // for (let i in users) {
-        //     if (data.email == users[i].email) {
-        //         let go = await decryptPass(data.password, users[i].password)
-        //         if (go == true) {
-        //             if (users[i].confirmed == true) {
-
-
-        //                 console.log("Witaj, ", users[i].name)
-        //                 let token = await createToken(data)
-        //                 users[i].token = token
-        //                 console.log('users', users)
-        //                 response.end(JSON.stringify({ success: true, message: "Witaj, " + users[i].name, token: token }))
-        //                 return false
-        //             }
-        //             else {
-        //                 response.end(JSON.stringify({ success: false, message: "potwierdz konto" }))
-        //                 console.log("potwierdz konto")
-        //                 return false
-        //             }
-        //         }
-        //     }
-        // }
-
         const check = await collection.findOne({ email: data.email });
         if (!check || check == null) {
             response.end(JSON.stringify({ success: false, message: "Zły login lub hasło" }))
@@ -172,13 +147,27 @@ const usersRouter = async (req, response) => {
         if (go == true) {
             if (check.confirmed == true) {
                 console.log("Witaj, ", check.name)
-                let token = await createToken(data)
+
+                let tokenData = {
+                    email: data.email
+                }
+                let token = await createToken(tokenData)
                 await collection.updateOne(
                     { email: data.email },           
                     { $set: { token: token } }
                 );
                 console.log('users', check)
-                response.end(JSON.stringify({ success: true, message: "Witaj, " + check.name, token: token }))
+                let checkToken = await verifyToken(token)
+                console.log("waznosc tokenu: ", checkToken)
+                
+                response.writeHead(200, {
+                    'Set-Cookie': `token=${token}; HttpOnly; SameSite=Strict; Max-Age=3600`,
+                    'Content-Type': 'application/json'
+                    });
+                response.end(JSON.stringify({ success: true, message: "Witaj, " + check.name }));
+
+
+                // response.end(JSON.stringify({ success: true, message: "Witaj, " + check.name, token: token }))
                 return false
             }
             else {
@@ -217,68 +206,139 @@ const usersRouter = async (req, response) => {
         let mail = splited[splited.length - 1]
         let data = JSON.parse(await getRequestData(req));
         console.log('update')
-        for (let i in users) {
-            if (mail == users[i].email) {
-                if (data.name !== undefined && data.name !== "") {
-                    users[i].name = data.name
-                }
-                if (data.lastName !== undefined && data.lastName !== "") {
-                    users[i].lastName = data.lastName
-                }
-                if (data.email !== undefined && data.email !== "") {
-                    if (data.email !== users[i].email) {
-                        for (let j in users) {
-                            if (data.email == users[j].email) {
-                                response.end("Konto już istnieje")
-                                return false
-                            }
-                        }
-                        users[i].email = data.email
-                    }
-
-                }
-                if (data.password !== undefined && data.password !== "") {
-                    let password = await encryptPass(data.password)
-                    users[i].password = password
-                }
-                response.end("Dane zostały zmienione")
-                console.log(users)
+        const check = await collection.findOne({ email: mail });
+        if (!check || check == null) {
+            response.end(JSON.stringify({ success: false, message: "Zły email" }))
+            return false
+        }
+        console.log('idididi', check.id)
+        if (data.name !== undefined && data.name !== "") {
+            // check.name = data.name
+            await collection.updateOne(   
+                { email: mail },     
+                { $set: { name: data.name } }
+            );
+        }
+        if (data.lastName !== undefined && data.lastName !== "") {
+            // check.lastName = data.lastName
+            await collection.updateOne(   
+                { email: mail },     
+                { $set: { lastName: data.lastName } }
+            );
+        }
+        if (data.email !== undefined && data.email !== "") {
+            const newCheck = await collection.findOne({ email: data.email });
+            if  (newCheck){
+                response.end("Konto już istnieje")
                 return false
             }
+            console.log('okokok',data.email)
+            await collection.updateOne(   
+                { email: mail },     
+                { $set: { email: data.email } }
+            );
         }
+        if (data.password !== undefined && data.password !== "") {
+            let password = await encryptPass(data.password)
+            // check.password = password
+            console.log(data.password)
+            await collection.updateOne(   
+                { email: mail },     
+                { $set: { password: password } }
+            );
+        }
+        response.end("Dane zostały zmienione")
+        console.log(users)
+        return false
+
+        // for (let i in users) {
+        //     if (mail == users[i].email) {
+        //         if (data.name !== undefined && data.name !== "") {
+        //             users[i].name = data.name
+        //         }
+        //         if (data.lastName !== undefined && data.lastName !== "") {
+        //             users[i].lastName = data.lastName
+        //         }
+        //         if (data.email !== undefined && data.email !== "") {
+        //             if (data.email !== users[i].email) {
+        //                 for (let j in users) {
+        //                     if (data.email == users[j].email) {
+        //                         response.end("Konto już istnieje")
+        //                         return false
+        //                     }
+        //                 }
+        //                 users[i].email = data.email
+        //             }
+
+        //         }
+        //         if (data.password !== undefined && data.password !== "") {
+        //             let password = await encryptPass(data.password)
+        //             users[i].password = password
+        //         }
+        //         response.end("Dane zostały zmienione")
+        //         console.log(users)
+        //         return false
+        //     }
+        // }
 
     }
 
     if (req.url.match(/\/api\/user\/profile\/icon\/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/) && req.method === "PATCH") {
         let splited = req.url.split("/")
         let mail = splited[splited.length - 1]
-        for (let i in users) {
-            if (mail == users[i].email) {
-                let form = formidable({});
+        // for (let i in users) {
+        //     if (mail == users[i].email) {
+        //         let form = formidable({});
+        //         form.uploadDir = 'upload'       // folder do zapisu zdjęcia
+        //         form.keepExtensions = true
+        //         form.parse(req, function (err, fields, files) {
+        //             let file = files.file
+        //             const fileUrl = path.basename(file.path);
+        //             users[i].icon = fileUrl
+        //             // response.end("Zdjęcie zostało zmienione")
+        //             response.end(JSON.stringify({ success: true, message: "Zdjęcie zostało zmienione", icon: fileUrl }))
+        //             console.log(users)
+        //         });
+        //     }
+        // }
+        const check = await collection.findOne({ email: mail });
+        if (!check || check == null) {
+            response.end(JSON.stringify({ success: false, message: "Zły email" }))
+            return false
+        }
+        let form = formidable({});
                 form.uploadDir = 'upload'       // folder do zapisu zdjęcia
                 form.keepExtensions = true
-                form.parse(req, function (err, fields, files) {
+                form.parse(req, async function (err, fields, files) {
+                    if (err) {
+                        response.end(JSON.stringify({ success: false, message: "Błąd formularza" }));
+                        return;
+                      }
                     let file = files.file
                     const fileUrl = path.basename(file.path);
-                    users[i].icon = fileUrl
-                    // response.end("Zdjęcie zostało zmienione")
+                    // users[i].icon = fileUrl
+
+                    await collection.updateOne(
+                        { email: mail },           
+                        { $set: { icon: fileUrl } }
+                    );
                     response.end(JSON.stringify({ success: true, message: "Zdjęcie zostało zmienione", icon: fileUrl }))
-                    console.log(users)
                 });
-            }
-        }
     }
 
     if (req.url.match(/\/api\/user\/single\/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/) && req.method === "GET") {
         let splited = req.url.split("/")
         let mail = splited[splited.length - 1]
         console.log(mail)
-        for (let i in users) {
-            if (mail == users[i].email) {
-                console.log(users[i])
-                response.end(JSON.stringify(users[i]))
-            }
-        }
+        const check = await collection.findOne({ email: mail });
+        // console.log(check)
+        // for (let i in users) {
+        //     if (mail == users[i].email) {
+        //         console.log(users[i])
+        //         response.end(JSON.stringify(users[i]))
+        //     }
+        // }
+        response.end(JSON.stringify(check))
     }
 
     if (req.url.match(/\/api\/user\/profile\/password\/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/) && req.method === "PATCH") {
@@ -286,22 +346,43 @@ const usersRouter = async (req, response) => {
         let mail = splited[splited.length - 1]
         let data = JSON.parse(await getRequestData(req));
         console.log(mail)
-        for (let i in users) {
-            if (mail == users[i].email) {
-                let go = await decryptPass(data.oldPassword, users[i].password)
-                if (go == true) {
-                    let password = await encryptPass(data.newPassword)
-                    users[i].password = password
-                    response.end(JSON.stringify({ success: true, message: "Hasło zostało zmienione" }))
-                    console.log(users)
-                    return false
-                }
-                else {
-                    response.end(JSON.stringify({ success: false, message: "Złe hasło" }))
-                    return false
-                }
-            }
+        const check = await collection.findOne({ email: mail });
+        if (!check || check == null) {
+            response.end(JSON.stringify({ success: false, message: "Zły email" }))
+            return false
         }
+        let go = await decryptPass(data.oldPassword, check.password)
+        if (go == true) {
+            let password = await encryptPass(data.newPassword)
+            // users[i].password = password
+            await collection.updateOne(   
+                { email: mail },     
+                { $set: { password: password } }
+            );
+            response.end(JSON.stringify({ success: true, message: "Hasło zostało zmienione" }))
+            console.log(users)
+            return false
+        }
+        else {
+            response.end(JSON.stringify({ success: false, message: "Złe hasło" }))
+            return false
+        }
+        // for (let i in users) {
+        //     if (mail == users[i].email) {
+        //         let go = await decryptPass(data.oldPassword, users[i].password)
+        //         if (go == true) {
+        //             let password = await encryptPass(data.newPassword)
+        //             users[i].password = password
+        //             response.end(JSON.stringify({ success: true, message: "Hasło zostało zmienione" }))
+        //             console.log(users)
+        //             return false
+        //         }
+        //         else {
+        //             response.end(JSON.stringify({ success: false, message: "Złe hasło" }))
+        //             return false
+        //         }
+        //     }
+        // }
     }
 
 }
