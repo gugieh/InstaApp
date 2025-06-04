@@ -4,7 +4,7 @@ const register = async (name, lastName, email, password) => {
     console.log('Sending registration request');
     try {
         console.log('Request payload:', { name, lastName, email, password });
-        const response = await axios.post('http://localhost:3000/api/user/register', {
+        const response = await axios.post('https://api.batko.it:3000/api/user/register', {
             name: name,
             lastName: lastName,
             email: email,

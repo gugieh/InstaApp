@@ -1,4 +1,5 @@
-import { createServer } from 'http';
+// import { createServer } from 'http';
+import { createServer } from 'https';
 import router from "./app/router.js";
 import usersRouter from "./app/userRouter.js"
 import 'dotenv/config'
@@ -12,11 +13,18 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-createServer(async (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Request-Method', '*');
+const credentials = {
+    key: fs.readFileSync('./cert/api.batko.it-key.pem'),
+    cert: fs.readFileSync('./cert/api.batko.it.pem')
+};
+
+createServer(credentials ,async (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', 'https://dev.batko.it:5173');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
     res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, PATCH, PUT, DELETE');
-    res.setHeader('Access-Control-Allow-Headers', '*, Authorization');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Cookie, withcredentials');
+
+
 
     if (req.method === 'OPTIONS') {
         res.writeHead(200);

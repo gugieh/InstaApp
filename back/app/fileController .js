@@ -44,7 +44,15 @@ const imageRouter = async (req, res) => {
             let file = files.file
             const fileUrl = path.basename(file.path);
             let email = fields.email
-            console.log('email', fields.email)
+            const cookie = req.headers.cookie
+            if (!cookie) {
+                res.writeHead(401, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, message: "Brak tokenu" }));
+                return;
+            }
+            const token = cookie.substring(6);
+            console.log('token', token)
+
             let data =
             {
                 "id": id,

@@ -4,10 +4,12 @@ const login = async (email, password) => {
     console.log('Sending registration request');
     try {
         console.log('Request payload:', { email, password });
-        const response = await axios.post('http://localhost:3000/api/user/login', {
+        const response = await axios.post('https://api.batko.it:3000/api/user/login', {
             email: email,
             password: password
-        });
+        },
+        { withCredentials: true }
+    );
         console.log('Response received');
         console.log(response);
         if (response.status === 200) {

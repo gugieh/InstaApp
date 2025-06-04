@@ -1,5 +1,7 @@
 import axios from 'axios';
 
+axios.defaults.withCredentials = true
+
 const sendPhoto = async (album, file, email) => {
     try {
         if (album !== "" && file !== null) {
@@ -8,10 +10,11 @@ const sendPhoto = async (album, file, email) => {
             formData.append("album", album);
             formData.append("email", email);
 
-            const res = await axios.post("http://localhost:3000/api/photos", formData, {
+            const res = await axios.post("https://api.batko.it:3000/api/photos", formData, {
                 headers: {
                     "Content-Type": "multipart/form-data"
-                }
+                },
+                
             });
 
             const data = res.data;

@@ -161,7 +161,7 @@ const usersRouter = async (req, response) => {
                 console.log("waznosc tokenu: ", checkToken)
                 
                 response.writeHead(200, {
-                    'Set-Cookie': `token=${token}; HttpOnly; SameSite=Strict; Max-Age=3600`,
+                    'Set-Cookie': `token=${token}; Domain=batko.it; path=/; HttpOnly; Secure; SameSite=None; Max-Age=3600`,
                     'Content-Type': 'application/json'
                     });
                 response.end(JSON.stringify({ success: true, message: "Witaj, " + check.name }));

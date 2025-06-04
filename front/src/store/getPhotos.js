@@ -4,7 +4,7 @@ const getPhotos = async (email) => {
     console.log('Sending registration request');
     try {
         console.log('Request payload:');
-        const response = await axios.get(`http://localhost:3000/api/photos/all/${email}`);
+        const response = await axios.get(`https://api.batko.it:3000/api/photos/all/${email}`);
         console.log('Response received');
         console.log(response);
         if (response.status === 200) {

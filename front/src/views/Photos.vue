@@ -55,7 +55,7 @@ export default {
       this.images = [];
       const result = await getPhotos(email);
       for (let i = 0; i < result.data.length; i++) {
-        let url = "http://localhost:3000/upload/" + result.data[i].url;
+        let url = "https://api.batko.it:3000/upload/" + result.data[i].url;
         let image = {
           url: url,
           id: result.data[i].id,
