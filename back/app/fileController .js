@@ -29,6 +29,17 @@ const imageRouter = async (req, res) => {
 
         form.uploadDir = 'upload'       // folder do zapisu zdjęcia
         form.keepExtensions = true
+
+        const cookie = req.headers.cookie
+        if (!cookie) {
+            res.writeHead(401, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: "Brak tokenu" }));
+            return false;
+        }
+        const token = cookie.substring(6);
+        console.log('token', token)
+        const checkToken = await verifyToken(token)
+
         form.parse(req, function (err, fields, files) {
 
             console.log("----- przesłane pola z formularza ------");
@@ -43,15 +54,9 @@ const imageRouter = async (req, res) => {
             console.log(id)
             let file = files.file
             const fileUrl = path.basename(file.path);
-            let email = fields.email
-            const cookie = req.headers.cookie
-            if (!cookie) {
-                res.writeHead(401, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({ success: false, message: "Brak tokenu" }));
-                return;
-            }
-            const token = cookie.substring(6);
-            console.log('token', token)
+
+            let email = checkToken.email
+            
 
             let data =
             {
@@ -74,7 +79,7 @@ const imageRouter = async (req, res) => {
             photosCollection.insertMany(data);
             res.end(JSON.stringify({ success: true, message: "Przesłano plik", image: id }))
         });
-
+        console.log(token)
     } 
     else if (req.url.match(/\/api\/photos\/all\/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/) && req.method === "GET") {
         let splited = req.url.split("/")

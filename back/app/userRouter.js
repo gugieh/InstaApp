@@ -30,9 +30,18 @@ const usersRouter = async (req, response) => {
 
     if (req.url == "/api/user/register" && req.method == "POST") {
         let data = JSON.parse(await getRequestData(req));
-        console.log(data.name);
+        console.log(data.name)
+        ;
+        const generateUserId = () => {
+        const timestamp = Date.now(); // np. 1717473628356
+        const random = Math.floor(Math.random() * 1000); // 0–999
+        return Number(`${timestamp}${random}`); // np. 1717473628356382
+        };
+
+        const userId = generateUserId();
 
         const datadb = {
+            userID: userId,
             email: data.email,
             name: data.name,
             lastName: data.lastName,
@@ -148,9 +157,13 @@ const usersRouter = async (req, response) => {
             if (check.confirmed == true) {
                 console.log("Witaj, ", check.name)
 
-                let tokenData = {
-                    email: data.email
-                }
+                // let tokenData = {
+                //     email: data.email
+                // }
+
+                // let tokenData = {
+                //     userID: ,
+                // }
                 let token = await createToken(tokenData)
                 await collection.updateOne(
                     { email: data.email },           
@@ -158,7 +171,7 @@ const usersRouter = async (req, response) => {
                 );
                 console.log('users', check)
                 let checkToken = await verifyToken(token)
-                console.log("waznosc tokenu: ", checkToken)
+                console.log("waznosc tokenu: ", checkToken.status)
                 
                 response.writeHead(200, {
                     'Set-Cookie': `token=${token}; Domain=batko.it; path=/; HttpOnly; Secure; SameSite=None; Max-Age=3600`,

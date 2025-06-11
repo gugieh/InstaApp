@@ -41,9 +41,9 @@ const verifyToken = (token) => {
         let nowInSeconds = Math.floor(Date.now() / 1000);
 
         if (nowInSeconds <= decoded.exp){
-            return true
+            return {status: true, email: decoded.email}
         }
-        return false
+        return { status: false, email: null }
 
     }
     catch (ex) {

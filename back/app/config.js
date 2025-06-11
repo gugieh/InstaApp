@@ -11,6 +11,11 @@ connect.then(() => {
 
 // Create Schema
 const Loginschema = new mongoose.Schema({
+    userID: {
+        type: Number,
+        unique: true,
+        required: true
+    },
     email: {
         type: String,
         required: true

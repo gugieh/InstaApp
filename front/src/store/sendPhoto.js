@@ -2,13 +2,12 @@ import axios from 'axios';
 
 axios.defaults.withCredentials = true
 
-const sendPhoto = async (album, file, email) => {
+const sendPhoto = async (album, file) => {
     try {
         if (album !== "" && file !== null) {
             const formData = new FormData();
             formData.append("file", file);
             formData.append("album", album);
-            formData.append("email", email);
 
             const res = await axios.post("https://api.batko.it:3000/api/photos", formData, {
                 headers: {
