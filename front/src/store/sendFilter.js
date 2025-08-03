@@ -4,7 +4,7 @@ const sendFilter = async (email, filter) => {
     console.log('Sending registration request');
     try {
         console.log('Request payload:', { email });
-        const response = await axios.patch(`http://localhost:3000/api/photos/edit/${email}`, {
+        const response = await axios.patch(`https://api.batko.it:3000/api/photos/edit/${email}`, {
             "filter": filter
         });
         console.log('Response received');

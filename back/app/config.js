@@ -1,5 +1,9 @@
 import mongoose from 'mongoose';
-const connect = mongoose.connect("mongodb://mo41658_instaapp:11Stachu!@mongo.ct8.pl:27017/mo41658_instaapp");
+import dotenv from 'dotenv';
+dotenv.config();
+
+let url = `mongodb://${process.env.MONGODB_LOGIN}:${process.env.MONGODB_PASS}@mongo.ct8.pl:27017/${process.env.MONGODB_LOGIN}`
+const connect = mongoose.connect(url);
 
 // Check database connected or not
 connect.then(() => {
@@ -11,11 +15,6 @@ connect.then(() => {
 
 // Create Schema
 const Loginschema = new mongoose.Schema({
-    userID: {
-        type: Number,
-        unique: true,
-        required: true
-    },
     email: {
         type: String,
         required: true
@@ -51,7 +50,7 @@ const photosSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    email: {
+    userID: {
         type: String,
         required: true
     },

@@ -12,7 +12,7 @@
   "dependencies": {
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
-    "dotenv": "^16.4.5",
+    "dotenv": "^16.6.1",
     "formidable": "^1.2.2",
     "fs": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",

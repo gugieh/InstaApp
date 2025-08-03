@@ -55,13 +55,13 @@ const imageRouter = async (req, res) => {
             let file = files.file
             const fileUrl = path.basename(file.path);
 
-            let email = checkToken.email
+            let userID = checkToken.userID
             
 
             let data =
             {
                 "id": id,
-                "email": email,
+                "userID": userID,
                 "album": album,
                 "originalName": file.name,
                 "filter": "none",
@@ -77,15 +77,28 @@ const imageRouter = async (req, res) => {
             }
 
             photosCollection.insertMany(data);
+            res.writeHead(401, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: true, message: "Przesłano plik", image: id }))
         });
         console.log(token)
     } 
-    else if (req.url.match(/\/api\/photos\/all\/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/) && req.method === "GET") {
-        let splited = req.url.split("/")
-        let email = splited[splited.length - 1]
-        console.log(`all photos ${email}`)
-        photosCollection.find({ email: email })
+    else if (req.url === "/api/photos/all" && req.method === "GET") {
+
+        const cookie = req.headers.cookie
+        if (!cookie) {
+            res.writeHead(401, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: "Brak tokenu" }));
+            return false;
+        }
+        const token = cookie.substring(6);
+        console.log('token', token)
+        const checkToken = await verifyToken(token)
+        if (!checkToken.status){
+            res.writeHead(401, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: "Brak tokenu" }));
+            return false
+        }
+        photosCollection.find({ userID: checkToken.userID })
         .then(photos => {
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify(photos));
@@ -97,7 +110,6 @@ const imageRouter = async (req, res) => {
         });
     }
     
-    //zrobione do tego miejsca
     else if (req.url.match(/\/api\/photos\/([0-9]+)/)) {
         if (req.method == "GET") {
             console.log('get')
@@ -228,15 +240,22 @@ const imageRouter = async (req, res) => {
         console.log('PATCH')
         let splited = req.url.split("/")
         let id = splited[splited.length - 1]
-        for (let i in photos) {
-            if (id == photos[i].id) {
-                let data = await getRequestData(req)
-                data = JSON.parse(data)
-                photos[i].filter = data.filter
-                res.end(JSON.stringify(photos[i]))
-                console.log(photos[i])
-            }
-        }
+        let data = await getRequestData(req)
+        data = JSON.parse(data)
+        photosCollection.updateOne(
+                { id: id },                   
+                { $set: { filter: data.filter } }
+            )
+            .then(result => {
+                console.log("Zaktualizowano:", result);
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: true }));
+            })
+            .catch(err => {
+                console.error("Błąd przy aktualizacji:", err);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: "Internal Server Error" }));
+            });
     }
 }
 

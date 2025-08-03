@@ -4,7 +4,7 @@ const createTag = async (tag) => {
     console.log('Sending registration request');
     try {
         console.log('Request payload:', { tag });
-        const response = await axios.post('http://localhost:3000/api/tags', {
+        const response = await axios.post('https://api.batko.it:3000/api/tags', {
             name: tag
         });
         console.log('Response received');

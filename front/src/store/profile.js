@@ -5,7 +5,12 @@ const profile = {
         try {
             console.log('Request payload:');
             console.log(email);
-            const response = await axios.get(`http://localhost:3000/api/user/single/${email}`);
+            const response = await axios.get(`https://api.batko.it:3000/api/user/single/${email}`,{
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                },
+                
+            });
             console.log('Response received');
             console.log(response);
             if (response.status === 200) {
@@ -24,7 +29,7 @@ const profile = {
         console.log('Sending registration request');
         try {
             console.log('Request payload:');
-            const response = await axios.patch(`http://localhost:3000/api/user/profile/${email}`, {
+            const response = await axios.patch(`https://api.batko.it:3000/api/user/profile/${email}`, {
                 "email": newEmail,
                 "name": name,
                 "lastName": lastName,
@@ -48,7 +53,7 @@ const profile = {
         console.log('Sending registration request');
         try {
             console.log('Request payload:');
-            const response = await axios.patch(`http://localhost:3000/api/user/profile/password/${email}`, {
+            const response = await axios.patch(`https://api.batko.it:3000/api/user/profile/password/${email}`, {
                 "oldPassword": oldPassword,
                 "newPassword": newPassword
             });
@@ -72,7 +77,7 @@ const profile = {
                 const formData = new FormData();
                 formData.append("file", file);
 
-                const res = await axios.patch(`http://localhost:3000/api/user/profile/icon/${email}`, formData, {
+                const res = await axios.patch(`https://api.batko.it:3000/api/user/profile/icon/${email}`, formData, {
                     headers: {
                         "Content-Type": "multipart/form-data"
                     }

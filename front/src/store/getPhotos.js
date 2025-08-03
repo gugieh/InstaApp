@@ -1,10 +1,11 @@
 import axios from 'axios';
 
-const getPhotos = async (email) => {
+const getPhotos = async () => {
     console.log('Sending registration request');
     try {
         console.log('Request payload:');
-        const response = await axios.get(`https://api.batko.it:3000/api/photos/all/${email}`);
+        const response = await axios.get(`https://api.batko.it:3000/api/photos/all`,
+        { withCredentials: true });
         console.log('Response received');
         console.log(response);
         if (response.status === 200) {

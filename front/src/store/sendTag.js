@@ -4,7 +4,7 @@ const sendTag = async (tag, id) => {
     console.log('Sending registration request');
     try {
         console.log('Request payload:', { tag });
-        const response = await axios.patch(`http://localhost:3000/api/photos/tags/${id}`, {
+        const response = await axios.patch(`https://api.batko.it:3000/api/photos/tags/${id}`, {
             name: tag
         });
         console.log('Response received');

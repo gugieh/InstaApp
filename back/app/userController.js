@@ -2,9 +2,11 @@ import bcryptjs from 'bcryptjs';
 const { hash, compare } = bcryptjs;
 import jsonwebtoken from 'jsonwebtoken';
 const { sign, verify } = jsonwebtoken;
+import dotenv from 'dotenv';
+dotenv.config();
 
 const pass = "moje tajne hasło"
-
+const secret_key = process.env.TOKEN_KEY
 const encryptPass = async (password) => {
     console.log(password)
     let encryptedPassword = await hash(password, 10);
@@ -24,7 +26,7 @@ const createToken = async (data) => {
 
     let token = await sign(
         data,
-        "verysecretkey", // key powinien być zapisany w .env
+        secret_key, // key powinien być zapisany w .env
         {
             expiresIn: "1h" // "1m", "1d", "24h"
         }
@@ -36,12 +38,12 @@ const createToken = async (data) => {
 const verifyToken = (token) => {
 
     try {
-        let decoded = verify(token, "verysecretkey")
+        let decoded = verify(token, secret_key)
         console.log({ decoded: decoded });
         let nowInSeconds = Math.floor(Date.now() / 1000);
 
         if (nowInSeconds <= decoded.exp){
-            return {status: true, email: decoded.email}
+            return {status: true, userID: decoded.userID}
         }
         return { status: false, email: null }
 

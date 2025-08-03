@@ -31,17 +31,17 @@ const usersRouter = async (req, response) => {
     if (req.url == "/api/user/register" && req.method == "POST") {
         let data = JSON.parse(await getRequestData(req));
         console.log(data.name)
-        ;
-        const generateUserId = () => {
-        const timestamp = Date.now(); // np. 1717473628356
-        const random = Math.floor(Math.random() * 1000); // 0–999
-        return Number(`${timestamp}${random}`); // np. 1717473628356382
-        };
+        
+        // const generateUserId = () => {
+        // const timestamp = Date.now(); // np. 1717473628356
+        // const random = Math.floor(Math.random() * 1000); // 0–999
+        // return Number(`${timestamp}${random}`); // np. 1717473628356382
+        // };
 
-        const userId = generateUserId();
+        // const userId = generateUserId();
 
         const datadb = {
-            userID: userId,
+            
             email: data.email,
             name: data.name,
             lastName: data.lastName,
@@ -62,7 +62,6 @@ const usersRouter = async (req, response) => {
             console.log('token', datadb.token)
 
             const userdata = await collection.insertMany(datadb);
-            console.log(userdata);
         }
         
         // for (let i in users) {
@@ -125,7 +124,7 @@ const usersRouter = async (req, response) => {
         try {
             const check = await collection.findOne({ token: id });
             if (!check) {
-                res.send("Invalid token");
+                response.end("Invalid token");
             }
             else {
                 await collection.updateOne(
@@ -138,7 +137,7 @@ const usersRouter = async (req, response) => {
             }
         }
         catch {
-            res.send("wrong Details");
+            response.end("wrong Details");
         }
     }
 
@@ -157,21 +156,13 @@ const usersRouter = async (req, response) => {
             if (check.confirmed == true) {
                 console.log("Witaj, ", check.name)
 
-                // let tokenData = {
-                //     email: data.email
-                // }
-
-                // let tokenData = {
-                //     userID: ,
-                // }
+                let tokenData = {
+                    userID: check._id
+                }
                 let token = await createToken(tokenData)
-                await collection.updateOne(
-                    { email: data.email },           
-                    { $set: { token: token } }
-                );
                 console.log('users', check)
                 let checkToken = await verifyToken(token)
-                console.log("waznosc tokenu: ", checkToken.status)
+                console.log("waznosc tokenu: ", checkToken.status, checkToken.userID)
                 
                 response.writeHead(200, {
                     'Set-Cookie': `token=${token}; Domain=batko.it; path=/; HttpOnly; Secure; SameSite=None; Max-Age=3600`,
@@ -179,8 +170,6 @@ const usersRouter = async (req, response) => {
                     });
                 response.end(JSON.stringify({ success: true, message: "Witaj, " + check.name }));
 
-
-                // response.end(JSON.stringify({ success: true, message: "Witaj, " + check.name, token: token }))
                 return false
             }
             else {
@@ -209,11 +198,6 @@ const usersRouter = async (req, response) => {
 
     }
 
-    // else if (req.url.match(req.url.match(/\/api\/user\/profile\/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/)) && req.method == "PATCH") {
-    //     let splited = req.url.split("/")
-    //     let id = splited[splited.length - 1]
-    //     console.log(id)
-    // }
     if (req.url.match(/\/api\/user\/profile\/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/) && req.method === "PATCH") {
         let splited = req.url.split("/")
         let mail = splited[splited.length - 1]
@@ -264,56 +248,11 @@ const usersRouter = async (req, response) => {
         console.log(users)
         return false
 
-        // for (let i in users) {
-        //     if (mail == users[i].email) {
-        //         if (data.name !== undefined && data.name !== "") {
-        //             users[i].name = data.name
-        //         }
-        //         if (data.lastName !== undefined && data.lastName !== "") {
-        //             users[i].lastName = data.lastName
-        //         }
-        //         if (data.email !== undefined && data.email !== "") {
-        //             if (data.email !== users[i].email) {
-        //                 for (let j in users) {
-        //                     if (data.email == users[j].email) {
-        //                         response.end("Konto już istnieje")
-        //                         return false
-        //                     }
-        //                 }
-        //                 users[i].email = data.email
-        //             }
-
-        //         }
-        //         if (data.password !== undefined && data.password !== "") {
-        //             let password = await encryptPass(data.password)
-        //             users[i].password = password
-        //         }
-        //         response.end("Dane zostały zmienione")
-        //         console.log(users)
-        //         return false
-        //     }
-        // }
-
     }
 
     if (req.url.match(/\/api\/user\/profile\/icon\/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/) && req.method === "PATCH") {
         let splited = req.url.split("/")
         let mail = splited[splited.length - 1]
-        // for (let i in users) {
-        //     if (mail == users[i].email) {
-        //         let form = formidable({});
-        //         form.uploadDir = 'upload'       // folder do zapisu zdjęcia
-        //         form.keepExtensions = true
-        //         form.parse(req, function (err, fields, files) {
-        //             let file = files.file
-        //             const fileUrl = path.basename(file.path);
-        //             users[i].icon = fileUrl
-        //             // response.end("Zdjęcie zostało zmienione")
-        //             response.end(JSON.stringify({ success: true, message: "Zdjęcie zostało zmienione", icon: fileUrl }))
-        //             console.log(users)
-        //         });
-        //     }
-        // }
         const check = await collection.findOne({ email: mail });
         if (!check || check == null) {
             response.end(JSON.stringify({ success: false, message: "Zły email" }))
@@ -329,7 +268,6 @@ const usersRouter = async (req, response) => {
                       }
                     let file = files.file
                     const fileUrl = path.basename(file.path);
-                    // users[i].icon = fileUrl
 
                     await collection.updateOne(
                         { email: mail },           
@@ -339,19 +277,36 @@ const usersRouter = async (req, response) => {
                 });
     }
 
-    if (req.url.match(/\/api\/user\/single\/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/) && req.method === "GET") {
-        let splited = req.url.split("/")
-        let mail = splited[splited.length - 1]
-        console.log(mail)
-        const check = await collection.findOne({ email: mail });
-        // console.log(check)
-        // for (let i in users) {
-        //     if (mail == users[i].email) {
-        //         console.log(users[i])
-        //         response.end(JSON.stringify(users[i]))
-        //     }
-        // }
-        response.end(JSON.stringify(check))
+    if (req.url.match("/api/user/single") && req.method === "GET") {
+
+        const cookie = req.headers.cookie
+        if (!cookie) {
+            response.writeHead(401, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ success: false, message: "Brak tokenu" }));
+            return false;
+        }
+        const token = cookie.substring(6);
+        console.log('token aa', token)
+        const checkToken = await verifyToken(token)
+        if (!checkToken.status){
+            response.writeHead(401, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ success: false, message: "Brak tokenu" }));
+            return false
+        }
+        console.log('userid', checkToken.userID )
+
+        collection.find({ _id: checkToken.userID })
+        .then(data => {
+            console.log('icona', data[0].icon)
+            response.writeHead(200, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify(data[0].icon));
+        })
+        .catch(err => {
+            console.error("Error fetching photos:", err);
+            response.writeHead(500, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ error: "Internal Server Error" }));
+        });
+        
     }
 
     if (req.url.match(/\/api\/user\/profile\/password\/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/) && req.method === "PATCH") {

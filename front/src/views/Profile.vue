@@ -99,7 +99,7 @@ export default {
             editedPassword: "",
             editedPassword2: "",
             showImageForm: false,
-            filterEdit: "http://localhost:3000/upload/image.png",
+            filterEdit: "https://api.batko.it:3000/upload/image.png",
             message: ""
         };
     },
@@ -108,11 +108,11 @@ export default {
             let email = localStorage.getItem("email");
             console.log(email);
             const result = await profile.getProfile(email);
-            console.log(result);
+            console.log('nyga result',result);
             this.email = result.data.email;
             this.name = result.data.name;
             this.lastName = result.data.lastName;
-            this.icon = "http://localhost:3000/upload/" + result.data.icon;
+            this.icon = "https://api.batko.it:3000/upload/" + result.data;
             this.editedName = this.name;
             this.editedLastName = this.lastName;
         },
@@ -150,7 +150,7 @@ export default {
             console.log("Selected file:", file);
             const response = await profile.updateIcon(this.email, file);
             // console.log(response);
-            this.icon = "http://localhost:3000/upload/" + response.icon;
+            this.icon = "https://api.batko.it:3000/upload/" + response.icon;
             this.showImageForm = false;
         }
     },

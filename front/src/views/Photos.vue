@@ -36,7 +36,7 @@ export default {
       showModal: false,
       selectedImage: null,
       tags: [],
-      filterUrl: "http://localhost:3000/upload/photo.png",
+      filterUrl: "https://api.batko.it:3000/upload/photo.png",
       filters: [
       { name: "grayscale" },
       { name: "invert" },
@@ -46,14 +46,13 @@ export default {
       showImageForm: false,
       selectedImageFilter: "none",
       selectedImageId: null,
-      filterEdit: "http://localhost:3000/upload/image.png"
+      filterEdit: "https://api.batko.it:3000/upload/image.png"
     };
   },
   methods: {
     async eee() {
-      let email = localStorage.getItem("email");
       this.images = [];
-      const result = await getPhotos(email);
+      const result = await getPhotos();
       for (let i = 0; i < result.data.length; i++) {
         let url = "https://api.batko.it:3000/upload/" + result.data[i].url;
         let image = {
@@ -67,8 +66,7 @@ export default {
     },
     async singleImage(id) {
       const result = await getSinglePhoto(id);
-      this.selectedImage = "http://localhost:3000/upload/" + result.data[0].url;
-      // console.log('tag', result.data[0].tags)
+      this.selectedImage = "https://api.batko.it:3000/upload/" + result.data[0].url;
       result.data[0].tags.forEach(tag => {
         this.tags.push(tag.name);
       });
