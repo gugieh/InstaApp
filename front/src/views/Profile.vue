@@ -105,14 +105,12 @@ export default {
     },
     methods: {
         async getData() {
-            let email = localStorage.getItem("email");
-            console.log(email);
-            const result = await profile.getProfile(email);
+            const result = await profile.getProfile();
             console.log('nyga result',result);
             this.email = result.data.email;
             this.name = result.data.name;
             this.lastName = result.data.lastName;
-            this.icon = "https://api.batko.it:3000/upload/" + result.data;
+            this.icon = "https://api.batko.it:3000/upload/" + result.data.icon;
             this.editedName = this.name;
             this.editedLastName = this.lastName;
         },
@@ -148,7 +146,7 @@ export default {
         async updateIcon(){
             const file = this.$refs.fileInput.files[0];
             console.log("Selected file:", file);
-            const response = await profile.updateIcon(this.email, file);
+            const response = await profile.updateIcon(file);
             // console.log(response);
             this.icon = "https://api.batko.it:3000/upload/" + response.icon;
             this.showImageForm = false;

@@ -77,10 +77,9 @@ const imageRouter = async (req, res) => {
             }
 
             photosCollection.insertMany(data);
-            res.writeHead(401, { 'Content-Type': 'application/json' });
+            res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ success: true, message: "Przesłano plik", image: id }))
         });
-        console.log(token)
     } 
     else if (req.url === "/api/photos/all" && req.method === "GET") {
 
@@ -134,47 +133,47 @@ const imageRouter = async (req, res) => {
                 res.end(JSON.stringify({ error: "Internal Server Error" }));
             });
         }
-        if (req.method == "PATCH") {
-            console.log('patch')
-            let splited = req.url.split("/")
-            let id = splited[splited.length - 1]
-            for (let i in photos) {
-                if (id == photos[i].id) {
-                    let form = formidable({});
+        // if (req.method == "PATCH") {
+        //     console.log('patch')
+        //     let splited = req.url.split("/")
+        //     let id = splited[splited.length - 1]
+        //     for (let i in photos) {
+        //         if (id == photos[i].id) {
+        //             let form = formidable({});
 
-                    form.uploadDir = 'upload'       // folder do zapisu zdjęcia
-                    form.keepExtensions = true
-                    form.parse(req, function (err, fields, files) {
+        //             form.uploadDir = 'upload'       // folder do zapisu zdjęcia
+        //             form.keepExtensions = true
+        //             form.parse(req, function (err, fields, files) {
 
-                        console.log("----- przesłane pola z formularza ------");
+        //                 console.log("----- przesłane pola z formularza ------");
 
-                        console.log(fields);
+        //                 console.log(fields);
 
-                        console.log("----- przesłane formularzem pliki ------");
+        //                 console.log("----- przesłane formularzem pliki ------");
 
-                        console.log(files);
-                        photos[i].album = fields.album
-                        photos[i].url = files.file.path
-                        res.end("plik przesłany!")
-                    });
-                    let split = photos[i].lastChange.split(" ")
-                    let change = split[split.length - 2]
-                    if (change == undefined) {
-                        photos[i].lastChange = "zmienione 1 raz"
-                    }
-                    else {
-                        change = parseInt(change) + 1
-                        photos[i].lastChange = `zmienione ${change} raz`
-                    }
-                    photos[i].history.push({
-                        "status": photos[i].lastChange,
-                        "timestamp": Date.now()
-                    })
-                    console.log(photos[i])
-                    return false
-                }
-            }
-        }
+        //                 console.log(files);
+        //                 photos[i].album = fields.album
+        //                 photos[i].url = files.file.path
+        //                 res.end("plik przesłany!")
+        //             });
+        //             let split = photos[i].lastChange.split(" ")
+        //             let change = split[split.length - 2]
+        //             if (change == undefined) {
+        //                 photos[i].lastChange = "zmienione 1 raz"
+        //             }
+        //             else {
+        //                 change = parseInt(change) + 1
+        //                 photos[i].lastChange = `zmienione ${change} raz`
+        //             }
+        //             photos[i].history.push({
+        //                 "status": photos[i].lastChange,
+        //                 "timestamp": Date.now()
+        //             })
+        //             console.log(photos[i])
+        //             return false
+        //         }
+        //     }
+        // }
         if (req.method == "DELETE") {
             console.log('delete')
             let splited = req.url.split("/")
@@ -193,14 +192,13 @@ const imageRouter = async (req, res) => {
         console.log('patch')
         let splited = req.url.split("/")
         let id = splited[splited.length - 1]
-        for (let i in photos) {
-            if (id == photos[i].id) {
-                let data = await getRequestData(req)
-                data = JSON.parse(data)
-                photos[i].tags.push(data)
-                console.log(photos[i])
-            }
-        }
+        let data = await getRequestData(req)
+        data = JSON.parse(data)
+        await photosCollection.updateOne(
+            { id: id },
+            { $push: { tags: data.name } }
+        );
+        res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ success: true, message: "dodano tag" }))
 
     }
@@ -229,12 +227,22 @@ const imageRouter = async (req, res) => {
         console.log('GET')
         let splited = req.url.split("/")
         let id = splited[splited.length - 1]
-        for (let i in photos) {
-            if (id == photos[i].id) {
-                res.end(JSON.stringify(photos[i].tags))
-                console.log(photos[i].tags)
-            }
-        }
+        // for (let i in photos) {
+        //     if (id == photos[i].id) {
+        //         res.end(JSON.stringify(photos[i].tags))
+        //         console.log(photos[i].tags)
+        //     }
+        // }
+        photosCollection.find({ id: id })
+        .then(photos => {
+            res.writeHead(200, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify(photos.tags));
+        })
+        .catch(err => {
+            console.error("Error fetching photos:", err);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ error: "Internal Server Error" }));
+        });
     }
     else if (req.url.match(/\/api\/photos\/edit\/([0-9]+)/) && req.method == "PATCH") {
         console.log('PATCH')

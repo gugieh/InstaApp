@@ -68,7 +68,7 @@ export default {
       const result = await getSinglePhoto(id);
       this.selectedImage = "https://api.batko.it:3000/upload/" + result.data[0].url;
       result.data[0].tags.forEach(tag => {
-        this.tags.push(tag.name);
+        this.tags.push(tag);
       });
       this.selectedImageFilter = result.data[0].filter;
       this.showModal = true;

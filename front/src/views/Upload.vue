@@ -55,7 +55,7 @@ export default {
         const result = await sendPhoto(this.album, file);
         console.log(result.image);
         for (let i = 0; i < this.tags.length; i++) {
-          await createTag(this.tags[i]);
+          // await createTag(this.tags[i]);
           await sendTag(this.tags[i], result.image);
         }
         this.$router.push({ path: "/insta" });

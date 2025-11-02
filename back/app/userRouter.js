@@ -10,35 +10,10 @@ import { encryptPass, createToken, verifyToken, decryptPass } from "./userContro
 import { collection } from "./config.js";
 
 const usersRouter = async (req, response) => {
-    // if (req.url == "/api/user/login" && req.method == "POST") {
-
-    //     if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
-    //         // czytam dane z nagłowka 
-    //         let token = req.headers.authorization.split(" ")[1]
-    //         console.log(token)
-    //     }
-
-    // }
-    // if (req.url == "/api/user/login" && req.method == "POST") {
-
-    //     if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
-    //         // czytam dane z nagłowka 
-    //         let token = req.headers.authorization.split(" ")[1]
-    //         console.log(token)
-    //     }
-    // }
 
     if (req.url == "/api/user/register" && req.method == "POST") {
         let data = JSON.parse(await getRequestData(req));
         console.log(data.name)
-        
-        // const generateUserId = () => {
-        // const timestamp = Date.now(); // np. 1717473628356
-        // const random = Math.floor(Math.random() * 1000); // 0–999
-        // return Number(`${timestamp}${random}`); // np. 1717473628356382
-        // };
-
-        // const userId = generateUserId();
 
         const datadb = {
             
@@ -51,60 +26,23 @@ const usersRouter = async (req, response) => {
             icon: 'icon.png'
         }
     
-        // Check if the username already exists in the database
         const existingUser = await collection.findOne({ email: datadb.email });
     
         if (existingUser) {
             response.end('User already exists. Please choose a different username.');
         } else {    
-            datadb.password = await encryptPass(data.password); // Replace the original password with the hashed one
+            datadb.password = await encryptPass(data.password);
             datadb.token = await createToken(data)
             console.log('token', datadb.token)
 
             const userdata = await collection.insertMany(datadb);
         }
-        
-        // for (let i in users) {
-        //     if (data.email == users[i].email) {
-        //         console.log('Konto już istnieje')
-        //         response.end("Konto już istnieje")
-        //         return false
-        //     }
-        // }
-
-        // if (data.name == undefined || data.name == "") {
-        //     return false
-        // }
-        // if (data.lastName == undefined && data.lastName == "") {
-        //     return false
-        // }
-        // if (data.email == undefined && data.email == "") {
-        //     return false
-        // }
-        // if (data.password == undefined && data.password == "") {
-        //     return false
-        // }
-        // data.password = await encryptPass(data.password)
-        // console.log('po', data)
-        // users.push(data)
-        // let token = await createToken(data)
-        // console.log('token', token)
-        // data["token"] = token
-        // data["confirmed"] = 'false'
-        // data["icon"] = 'icon.png'
-        // console.log('users', users)
-
-        response.end(`
-        skopiuj poniższy link do przeglądarki
-        http://localhost:3000/api/user/confirm/${datadb.token}
+        response.writeHead(200, { 'Content-Type': 'application/json' });
+        response.end(JSON.stringify(`skopiuj poniższy link do przeglądarki
+        https://api.batko.it:3000/api/user/confirm/${datadb.token}
         w celu potwierdzenia konta
-        Uwaga: link jest ważny przez godzinę`)
+        Uwaga: link jest ważny przez godzinę`))
 
-        // if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
-        //     // czytam dane z nagłowka 
-        //     let token = req.headers.authorization.split(" ")[1]
-        //     console.log(token)
-        // }
     }
 
     if (req.url.match("/api/user/confirm") && req.method == "GET") {
@@ -112,15 +50,6 @@ const usersRouter = async (req, response) => {
 
         let splited = req.url.split("/")
         let id = splited[splited.length - 1]
-        // for (let i in users) {
-        //     if (id == users[i].token) {
-        //         users[i].confirmed = true
-        //         users[i].token = undefined
-        //         response.end("Konto zostalo potwierdzone")
-        //         console.log(users)
-        //         return false
-        //     }
-        // }
         try {
             const check = await collection.findOne({ token: id });
             if (!check) {
@@ -150,7 +79,7 @@ const usersRouter = async (req, response) => {
             response.end(JSON.stringify({ success: false, message: "Zły login lub hasło" }))
             return false
         }
-            // Compare the hashed password from the database with the plaintext password
+
         let go = await decryptPass(data.password, check.password)
         if (go == true) {
             if (check.confirmed == true) {
@@ -210,14 +139,12 @@ const usersRouter = async (req, response) => {
         }
         console.log('idididi', check.id)
         if (data.name !== undefined && data.name !== "") {
-            // check.name = data.name
             await collection.updateOne(   
                 { email: mail },     
                 { $set: { name: data.name } }
             );
         }
         if (data.lastName !== undefined && data.lastName !== "") {
-            // check.lastName = data.lastName
             await collection.updateOne(   
                 { email: mail },     
                 { $set: { lastName: data.lastName } }
@@ -237,7 +164,6 @@ const usersRouter = async (req, response) => {
         }
         if (data.password !== undefined && data.password !== "") {
             let password = await encryptPass(data.password)
-            // check.password = password
             console.log(data.password)
             await collection.updateOne(   
                 { email: mail },     
@@ -250,16 +176,30 @@ const usersRouter = async (req, response) => {
 
     }
 
-    if (req.url.match(/\/api\/user\/profile\/icon\/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/) && req.method === "PATCH") {
-        let splited = req.url.split("/")
-        let mail = splited[splited.length - 1]
-        const check = await collection.findOne({ email: mail });
+    if (req.url.match("api/user/profile/icon") && req.method === "PATCH") {
+        const cookie = req.headers.cookie
+        if (!cookie) {
+            res.writeHead(401, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({ success: false, message: "Brak tokenu" }));
+            return false;
+        }
+        const token = cookie.substring(6);
+        console.log('token profil', token)
+        
+        const checkToken = await verifyToken(token)
+        if (!checkToken.status){
+            response.writeHead(401, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ success: false, message: "Brak tokenu" }));
+            return false
+        }
+
+        const check = await collection.find({ _id: checkToken.userID });
         if (!check || check == null) {
             response.end(JSON.stringify({ success: false, message: "Zły email" }))
             return false
         }
         let form = formidable({});
-                form.uploadDir = 'upload'       // folder do zapisu zdjęcia
+                form.uploadDir = 'upload'
                 form.keepExtensions = true
                 form.parse(req, async function (err, fields, files) {
                     if (err) {
@@ -268,12 +208,19 @@ const usersRouter = async (req, response) => {
                       }
                     let file = files.file
                     const fileUrl = path.basename(file.path);
-
-                    await collection.updateOne(
-                        { email: mail },           
+                    console.log('nygaaa', checkToken.userID)
+                    let updateCheck = await collection.updateOne(
+                        { _id: checkToken.userID },           
                         { $set: { icon: fileUrl } }
                     );
-                    response.end(JSON.stringify({ success: true, message: "Zdjęcie zostało zmienione", icon: fileUrl }))
+                    if (updateCheck){
+                        response.setHeader('Content-Type', 'application/json');
+                        response.end(JSON.stringify({ success: true, message: "Zdjęcie zostało zmienione", icon: fileUrl }))
+                    }
+                    else{
+                        response.setHeader('Content-Type', 'application/json');
+                        response.end(JSON.stringify({ success: false, message: "Zdjęcie nie ostało zmienione", icon: fileUrl }))
+                    }
                 });
     }
 
@@ -297,9 +244,15 @@ const usersRouter = async (req, response) => {
 
         collection.find({ _id: checkToken.userID })
         .then(data => {
-            console.log('icona', data[0].icon)
+            console.log('icona', data[0])
+            let profileDetails= {
+                name: data[0].name,
+                lastName: data[0].lastName,
+                email: data[0].email,
+                icon: data[0].icon
+            }
             response.writeHead(200, { 'Content-Type': 'application/json' });
-            response.end(JSON.stringify(data[0].icon));
+            response.end(JSON.stringify(profileDetails));
         })
         .catch(err => {
             console.error("Error fetching photos:", err);
@@ -322,7 +275,7 @@ const usersRouter = async (req, response) => {
         let go = await decryptPass(data.oldPassword, check.password)
         if (go == true) {
             let password = await encryptPass(data.newPassword)
-            // users[i].password = password
+
             await collection.updateOne(   
                 { email: mail },     
                 { $set: { password: password } }
@@ -335,22 +288,7 @@ const usersRouter = async (req, response) => {
             response.end(JSON.stringify({ success: false, message: "Złe hasło" }))
             return false
         }
-        // for (let i in users) {
-        //     if (mail == users[i].email) {
-        //         let go = await decryptPass(data.oldPassword, users[i].password)
-        //         if (go == true) {
-        //             let password = await encryptPass(data.newPassword)
-        //             users[i].password = password
-        //             response.end(JSON.stringify({ success: true, message: "Hasło zostało zmienione" }))
-        //             console.log(users)
-        //             return false
-        //         }
-        //         else {
-        //             response.end(JSON.stringify({ success: false, message: "Złe hasło" }))
-        //             return false
-        //         }
-        //     }
-        // }
+
     }
 
 }
