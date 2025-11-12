@@ -8,7 +8,7 @@ dotenv.config();
 const pass = "moje tajne hasło"
 const secret_key = process.env.TOKEN_KEY
 const encryptPass = async (password) => {
-    console.log(password)
+    // console.log(password)
     let encryptedPassword = await hash(password, 10);
     return encryptedPassword
     // console.log({ encryptedPassword: encryptedPassword });

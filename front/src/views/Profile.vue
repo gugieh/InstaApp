@@ -132,6 +132,10 @@ export default {
             this.showEditForm2 = false;
         },
         async savePassword(){
+            if (this.editedPassword != this.editedPassword2){
+                this.message = "Hasło nie zgadza się"
+                return false
+            }
             if(this.editedOldPassword != "" && this.editedPassword != "" && this.editedPassword2 != ""){
                 if(this.editedPassword == this.editedPassword2){
                     const response = await profile.updatePassword(this.email, this.editedOldPassword, this.editedPassword);
@@ -142,6 +146,7 @@ export default {
                     this.message = response.data.message;
                 }
             }
+            
         },
         async updateIcon(){
             const file = this.$refs.fileInput.files[0];

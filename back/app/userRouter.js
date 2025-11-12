@@ -262,14 +262,29 @@ const usersRouter = async (req, response) => {
         
     }
 
-    if (req.url.match(/\/api\/user\/profile\/password\/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/) && req.method === "PATCH") {
-        let splited = req.url.split("/")
-        let mail = splited[splited.length - 1]
+    // if (req.url.match(/\/api\/user\/profile\/password\/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/) && req.method === "PATCH") {
+    if (req.url.match("/api/user/profile/password") && req.method === "PATCH") {
+        // let splited = req.url.split("/")
+        // let mail = splited[splited.length - 1]
+        const cookie = req.headers.cookie
+        if (!cookie) {
+            response.writeHead(401, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ success: false, message: "Brak tokenu" }));
+            return false;
+        }
+        const token = cookie.substring(6);
+        const checkToken = await verifyToken(token)
+        if (!checkToken.status){
+            response.writeHead(401, { 'Content-Type': 'application/json' });
+            response.end(JSON.stringify({ success: false, message: "Brak tokenu" }));
+            return false
+        }
+        // console.log('userid', checkToken.userID ) 
         let data = JSON.parse(await getRequestData(req));
-        console.log(mail)
-        const check = await collection.findOne({ email: mail });
+        
+        const check = await collection.findOne({ _id: checkToken.userID});
         if (!check || check == null) {
-            response.end(JSON.stringify({ success: false, message: "Zły email" }))
+            response.end(JSON.stringify({ success: false, message: "Zły token" }))
             return false
         }
         let go = await decryptPass(data.oldPassword, check.password)
@@ -277,11 +292,10 @@ const usersRouter = async (req, response) => {
             let password = await encryptPass(data.newPassword)
 
             await collection.updateOne(   
-                { email: mail },     
+                { _id: checkToken.userID },     
                 { $set: { password: password } }
             );
             response.end(JSON.stringify({ success: true, message: "Hasło zostało zmienione" }))
-            console.log(users)
             return false
         }
         else {

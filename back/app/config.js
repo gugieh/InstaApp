@@ -2,7 +2,10 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 dotenv.config();
 
-let url = `mongodb://${process.env.MONGODB_LOGIN}:${process.env.MONGODB_PASS}@mongo.ct8.pl:27017/${process.env.MONGODB_LOGIN}`
+// let url = `mongodb://${process.env.MONGODB_LOGIN}:${process.env.MONGODB_PASS}@localhost:27017/${process.env.MONGODB_LOGIN}`
+let url = `mongodb://${process.env.MONGODB_LOGIN}:${process.env.MONGODB_PASS}@localhost:27017/insta_app?authSource=admin`;
+
+
 const connect = mongoose.connect(url);
 
 // Check database connected or not

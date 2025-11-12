@@ -13,9 +13,11 @@
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.6.1",
+    "express": "^5.1.0",
     "formidable": "^1.2.2",
     "fs": "^0.0.1-security",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.7.3"
+    "mongoose": "^8.7.3",
+    "npm": "^11.6.2"
   }
 }
